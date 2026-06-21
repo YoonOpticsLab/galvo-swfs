@@ -1,6 +1,12 @@
 #include <SPI.h>
 #define CS_PIN 10
 
+const double V_max_A =  10.35;
+const double V_min_A = -10.37;
+
+const double V_max_B =  10.35;
+const double V_min_B = -10.333;
+
 void dac8562Write(int mode, uint8_t cmd, uint16_t value) {
   SPISettings settings;
   switch(mode) {
@@ -22,20 +28,16 @@ void dac8562Write(int mode, uint8_t cmd, uint16_t value) {
 
 uint32_t volts_to_bitsA(double V)
 {
-  const double V_max = 10.3;
-  const double V_min = -10.415;
-  double range = (V_max - V_min);
-  double value = (V-V_min)/range * 0xffff + 0.5;
+  double range = (V_max_A - V_min_A);
+  double value = (V-V_min_A)/range * 0xffff + 0.5;
 
   return (uint32_t)value;
 }
 
 uint32_t volts_to_bitsB(double V)
 {
-  const double V_max = 10.309;
-  const double V_min = -10.3775;
-  double range = (V_max - V_min);
-  double value = (V-V_min)/range * 0xffff + 0.5;
+  double range = (V_max_B - V_min_B);
+  double value = (V-V_min_B)/range * 0xffff + 0.5;
 
   return (uint32_t)value;
 }
