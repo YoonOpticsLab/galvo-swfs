@@ -1,6 +1,7 @@
 #include "galvo-swfs.h"
 
 const double MAX_MOVEMENT_V=1;
+int debug_prints=0;
 
 class Galvo {
   public:
@@ -15,21 +16,33 @@ class Galvo {
   };
   
  int moveto1(double x,double y) {
-    double dx = this->x - x;
-    double dy = this->y - y;
+    double dx = x - this->x;
+    double dy = y - this->y;
     double distance = std::sqrt(dx * dx + dy * dy);
 
-    // Close enough!
-    if (distance < 1e-9) {
+    // Close enough! Call it done.
+    if (distance < 1e-5) {
         return 1;
     }
 
     double ratio = max_movement_v / distance;
     double xnew = this->x + dx * ratio;
     double ynew = this->y + dy * ratio;
-    Serial.println( xnew, ynew);
+
+    if (distance < max_movement_v) {
+      xnew = x;
+      ynew = y;
+    }
+
+    // For debugging the position:
+    if (debug_prints) {
+      Serial.print( xnew ); Serial.print(" "); Serial.println( ynew );
+    };
+
     this->x = xnew;
     this->y = ynew;
+
+    move_both( this->x, this->y); // ACtually do the physical move
     return 0;
  };
 
@@ -48,13 +61,24 @@ void setup() {
   Serial.begin(115200);
   initDAC(0);
   Serial.print("Galvo sWFS ready."); Serial.println();
+
+  // These would happen once at startup:
+  //theGalvo.moveto(-3,-3);
+  //theGalvo.moveto(5,5);
+  //theGalvo.moveto(0,0);
 }
 
+// These are called continuously:
+double square_radius=0.5;
 void loop() {
   loopManual();
 
-  theGalvo.moveto(0,0);
-  theGalvo.moveto(5,5);
+  if (square_radius>0) {
+    theGalvo.moveto(-square_radius,-square_radius);
+    theGalvo.moveto(-square_radius, square_radius);
+    theGalvo.moveto( square_radius, square_radius);
+    theGalvo.moveto( square_radius,-square_radius);
+  };
 }
 
 // Manual version: This takes commands and moves immediately
@@ -107,6 +131,10 @@ void loopManual() {
       // Clear the string for the next message
       incomingString = "";
 
+    } else if (incomingChar == 's') {
+      square_radius = atof(incomingString.c_str());
+    } else if (incomingChar == 'd') {
+      debug_prints = (debug_prints==0);
     } else {
 
       // Append the character to our string

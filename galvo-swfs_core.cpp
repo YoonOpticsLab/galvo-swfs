@@ -50,3 +50,8 @@ void initDAC(uint8_t mode) {
   dac8562Write(mode, 0x18, volts_to_bitsA(0));  // DAC A
   dac8562Write(mode, 0x19, volts_to_bitsA(0));  // DAC B
 }
+
+void move_both(double A, double B) {
+  dac8562Write(0, 0x18, volts_to_bitsA(A));  // DAC A
+  dac8562Write(0, 0x19, volts_to_bitsB(B));  // DAC B
+}
