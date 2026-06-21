@@ -1,5 +1,49 @@
 #include "galvo-swfs.h"
 
+const double MAX_MOVEMENT_V=1;
+
+class Galvo {
+  public:
+    double x=0;
+    double y=0;
+    double max_movement_v=0;
+    
+  Galvo(double max_movement) {
+    this->x=0;
+    this->y=0;
+    this->max_movement_v = max_movement;
+  };
+  
+ int moveto1(double x,double y) {
+    double dx = this->x - x;
+    double dy = this->y - y;
+    double distance = std::sqrt(dx * dx + dy * dy);
+
+    // Close enough!
+    if (distance < 1e-9) {
+        return 1;
+    }
+
+    double ratio = max_movement_v / distance;
+    double xnew = this->x + dx * ratio;
+    double ynew = this->y + dy * ratio;
+    Serial.println( xnew, ynew);
+    this->x = xnew;
+    this->y = ynew;
+    return 0;
+ };
+
+ void moveto(double x, double y) {
+  int done;
+   do {
+      done = moveto1( x, y);
+   } while (!done);
+ };
+ 
+};
+
+Galvo theGalvo(MAX_MOVEMENT_V);
+
 void setup() {
   Serial.begin(115200);
   initDAC(0);
@@ -8,6 +52,9 @@ void setup() {
 
 void loop() {
   loopManual();
+
+  theGalvo.moveto(0,0);
+  theGalvo.moveto(5,5);
 }
 
 // Manual version: This takes commands and moves immediately

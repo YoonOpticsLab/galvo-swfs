@@ -11,5 +11,3 @@ uint32_t volts_to_bitsA(double V);
 uint32_t volts_to_bitsB(double V);
 
 void initDAC(uint8_t mode);
-
-const int MAX_MOVEMENT_V=2;
